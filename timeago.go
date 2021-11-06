@@ -13,8 +13,9 @@ import (
 // 60 seconds, add `|online` flag to the datetime string.
 // Format must be [year-month-day hours:minutes:seconds}
 func Take(datetime string, langs ...string) string {
-	lang, format, option := getOption(&datetime)
+	format, option := getOption(&datetime)
 	seconds := getSeconds(datetime, format)
+	var lang string
 	if len(langs) > 0 {
 		lang = langs[0]
 	}
@@ -39,9 +40,11 @@ func Timestamp(timestamp int64, langAndOptions ...string) string {
 	return calculateTheResult(seconds, option, lang)
 }
 
+var DefaultTimeFormat = "2006-01-02 15:04:05"
+
 func getSeconds(datetime, format string) (seconds int) {
 	if len(format) == 0 {
-		format = "2006-01-02 15:04:05"
+		format = DefaultTimeFormat
 	}
 	if loc != nil {
 		parsedTime, _ := time.ParseInLocation(format, datetime, loc)
@@ -138,14 +141,13 @@ func getWords(timeKind string, num int, lang string) string {
 // getOption check if datetime has option with time,
 // if yes, it will return this option and remove it
 // from datetime
-func getOption(datetime *string) (string, string, string) {
+func getOption(datetime *string) (string, string) {
 	date := *datetime
 	spittedDateString := strings.Split(date, "|")
 
 	var (
 		option string
 		format string
-		lang   string
 	)
 	size := len(spittedDateString)
 	if size > 1 {
@@ -156,10 +158,7 @@ func getOption(datetime *string) (string, string, string) {
 		if size > 2 {
 			format = spittedDateString[2]
 		}
-		if size > 3 {
-			lang = spittedDateString[3]
-		}
 	}
 
-	return lang, format, option
+	return format, option
 }

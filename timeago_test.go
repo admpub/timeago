@@ -29,7 +29,7 @@ func TestGetOption(test *testing.T) {
 
 	for _, tc := range cases {
 		test.Run(tc.name, func(t *testing.T) {
-			_, _, option := getOption(&tc.date)
+			_, option := getOption(&tc.date)
 
 			if option != tc.optionMustBe {
 				t.Errorf("Result of getOption func must return `online` string and `true`, but `%s` string returned returned", tc.optionMustBe)
