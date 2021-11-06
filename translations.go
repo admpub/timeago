@@ -24,6 +24,7 @@ func (t *Translations) init() {
 		"years":   {t.T("year"), t.T("years"), t.T("years2")},
 	}
 }
+
 func (t *Translations) T(key string) string {
 	if t, ok := t.source[key]; ok {
 		return t
