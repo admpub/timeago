@@ -11,6 +11,7 @@ import (
 // Take coverts given datetime into `x time ago` format.
 // For displaying `Online` word if date interval within
 // 60 seconds, add `|online` flag to the datetime string.
+// or add `|online|2006-01-02 15:04:05` flag to the datetime string.
 // Format must be [year-month-day hours:minutes:seconds}
 func Take(datetime string, langs ...string) string {
 	format, option := getOption(&datetime)
