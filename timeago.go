@@ -1,6 +1,7 @@
 package timeago
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -11,48 +12,61 @@ import (
 // For displaying `Online` word if date interval within
 // 60 seconds, add `|online` flag to the datetime string.
 // Format must be [year-month-day hours:minutes:seconds}
-func Take(datetime string) string {
-	option, hasOption := getOption(&datetime)
-
-	loc, _ := time.LoadLocation(location)
-	parsedTime, _ := time.ParseInLocation("2006-01-02 15:04:05", datetime, loc)
-	seconds := int(time.Now().In(loc).Sub(parsedTime).Seconds())
-
+func Take(datetime string, langs ...string) string {
+	lang, format, option, hasOption := getOption(&datetime)
+	seconds := getSeconds(datetime, format)
+	if len(langs) > 0 {
+		lang = langs[0]
+	}
 	switch {
 	case seconds < 0 && option == "online":
-		return trans("online")
+		return trans("online", lang)
 	case seconds < 0:
-		return getWords("seconds", 0)
+		return getWords("seconds", 0, lang)
 	}
 
-	return calculateTheResult(seconds, hasOption, option)
+	return calculateTheResult(seconds, hasOption, option, lang)
 }
 
-func calculateTheResult(seconds int, hasOption bool, option string) string {
+func getSeconds(datetime, format string) (seconds int) {
+	if len(format) == 0 {
+		format = "2006-01-02 15:04:05"
+	}
+	if loc != nil {
+		parsedTime, _ := time.ParseInLocation(format, datetime, loc)
+		seconds = int(time.Now().In(loc).Sub(parsedTime).Seconds())
+	} else {
+		parsedTime, _ := time.ParseInLocation(format, datetime, time.Local)
+		seconds = int(time.Since(parsedTime).Seconds())
+	}
+	return
+}
+
+func calculateTheResult(seconds int, hasOption bool, option string, lang string) string {
 	minutes, hours, days, weeks, months, years := getTimeCalculations(float64(seconds))
 
 	switch {
 	case hasOption && option == "online" && seconds < 60:
-		return trans("online")
+		return trans("online", lang)
 	case seconds < 60:
-		return getWords("seconds", seconds)
+		return getWords("seconds", seconds, lang)
 	case minutes < 60:
-		return getWords("minutes", minutes)
+		return getWords("minutes", minutes, lang)
 	case hours < 24:
-		return getWords("hours", hours)
+		return getWords("hours", hours, lang)
 	case days < 7:
-		return getWords("days", days)
+		return getWords("days", days, lang)
 	case weeks < 4:
-		return getWords("weeks", weeks)
+		return getWords("weeks", weeks, lang)
 	case months < 12:
 		if months == 0 {
 			months = 1
 		}
 
-		return getWords("months", months)
+		return getWords("months", months, lang)
 	}
 
-	return getWords("years", years)
+	return getWords("years", years, lang)
 }
 
 func getTimeCalculations(seconds float64) (int, int, int, int, int, int) {
@@ -77,7 +91,7 @@ func getLastNumber(num int) int {
 // getWords decides rather the word must be singular or plural,
 // and depending on the result it adds the correct word after
 // the time number
-func getWords(timeKind string, num int) string {
+func getWords(timeKind string, num int, lang string) string {
 	lastNum := getLastNumber(num)
 	index := 2
 
@@ -90,46 +104,41 @@ func getWords(timeKind string, num int) string {
 		index = 1
 	}
 
-	timeTrans := getTimeTranslations()
-
-	return strconv.Itoa(num) + " " + timeTrans[timeKind][index] + " " + trans("ago")
-}
-
-// getTimeTranslations returns array of translations for different
-// cases. For example `1 second` must not have `s` at the end
-// but `2 seconds` requires `s`. So this method keeps all
-// possible options for the translated word.
-func getTimeTranslations() map[string][]string {
-	return map[string][]string{
-		"seconds": {trans("second"), trans("seconds"), trans("seconds2")},
-		"minutes": {trans("minute"), trans("minutes"), trans("minutes2")},
-		"hours":   {trans("hour"), trans("hours"), trans("hours2")},
-		"days":    {trans("day"), trans("days"), trans("days2")},
-		"weeks":   {trans("week"), trans("weeks"), trans("weeks2")},
-		"months":  {trans("month"), trans("months"), trans("months2")},
-		"years":   {trans("year"), trans("years"), trans("years2")},
+	timeTrans := getTimeTranslations(lang)
+	format := trans("format", lang)
+	if len(format) > 0 && format != `format` {
+		return fmt.Sprintf(format, strconv.Itoa(num), timeTrans[timeKind][index], trans("ago", lang))
 	}
+	return strconv.Itoa(num) + " " + timeTrans[timeKind][index] + " " + trans("ago", lang)
 }
 
 // getOption check if datetime has option with time,
 // if yes, it will return this option and remove it
 // from datetime
-func getOption(datetime *string) (string, bool) {
+func getOption(datetime *string) (string, string, string, bool) {
 	date := *datetime
 	spittedDateString := strings.Split(date, "|")
 
-	if len(spittedDateString) > 1 {
+	var (
+		option    string
+		format    string
+		lang      string
+		hasOption bool
+	)
+	size := len(spittedDateString)
+	if size > 1 {
 		*datetime = spittedDateString[0]
-		return spittedDateString[1], true
+		if len(spittedDateString[1]) > 0 {
+			option = spittedDateString[1]
+			hasOption = true
+		}
+		if size > 2 {
+			format = spittedDateString[2]
+		}
+		if size > 3 {
+			lang = spittedDateString[3]
+		}
 	}
 
-	return "", false
-}
-
-func trans(key string) string {
-	if language == "ru" {
-		return getRussian()[key]
-	}
-
-	return getEnglish()[key]
+	return lang, format, option, hasOption
 }

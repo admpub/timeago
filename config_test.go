@@ -56,17 +56,22 @@ func TestSet_for_location(t *testing.T) {
 		value string
 		err   string
 	}{
-		{"sets location to India Delhi", "India/Delhi", "Set must set the `location` variable to `India/Delhi` but it didn't"},
+		{"sets location to India Delhi", "America/New_York", "Set must set the `location` variable to `America/New_York` but it didn't"},
 		{"sets language to Europe/Kiev", "Europe/Kiev", "Set must set the `location` variable to `Europe/Kiev` but it didn't"},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(test *testing.T) {
-			Set("location", tc.value)
+			err := Set("location", tc.value)
+			if err != nil {
+				panic(err)
+			}
 
 			if location != tc.value {
 				test.Error(tc.err)
 			}
 		})
 	}
+
+	Set("location", ``)
 }

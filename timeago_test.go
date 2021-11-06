@@ -30,7 +30,7 @@ func TestGetOption(test *testing.T) {
 
 	for _, tc := range cases {
 		test.Run(tc.name, func(t *testing.T) {
-			option, hasOption := getOption(&tc.date)
+			_, _, option, hasOption := getOption(&tc.date)
 
 			if hasOption != tc.hasOptionMustBe || option != tc.optionMustBe {
 				t.Errorf("Result of getOption func must return `online` string and `true`, but `%s` string and `%v` returned returned", tc.optionMustBe, tc.hasOptionMustBe)
@@ -43,13 +43,13 @@ func TestGetTimeTranslations(t *testing.T) {
 	t.Parallel()
 
 	t.Run("returns 7 items", func(test *testing.T) {
-		if res := len(getTimeTranslations()); res != 7 {
+		if res := len(getTimeTranslations(`ru`)); res != 7 {
 			test.Errorf("Must return 7 items but got %d", res)
 		}
 	})
 
 	t.Run("every slice has 3 items", func(test *testing.T) {
-		for _, slice := range getTimeTranslations() {
+		for _, slice := range getTimeTranslations(`ru`) {
 			if res := len(slice); res != 3 {
 				test.Errorf("Slice Must return 3 items but got %d", res)
 			}
@@ -81,9 +81,9 @@ func TestGetWords(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.result, func(test *testing.T) {
 			Set("language", tc.lang)
-			Set("location", "Europe/Kiev")
+			//Set("location", "Europe/Kiev")
 
-			if res := getWords(tc.timeKind, tc.num); res != tc.result {
+			if res := getWords(tc.timeKind, tc.num, tc.lang); res != tc.result {
 				test.Errorf("Result must be `%s` but got `%s` instead", tc.result, res)
 			}
 		})
@@ -207,10 +207,10 @@ func TestTake(t *testing.T) {
 	for _, tc := range cases {
 		t.Run("result for "+tc.date, func(test *testing.T) {
 			Set("language", tc.lang)
-			Set("location", "Europe/Kiev")
+			//Set("location", "Europe/Kiev")
 
 			if res := Take(tc.date); res != tc.result {
-				test.Errorf("Result must be %s, but got %s instead", tc.result, res)
+				test.Errorf("%s: Result must be %s, but got %s instead", tc.date, tc.result, res)
 			}
 		})
 	}
@@ -381,7 +381,7 @@ func TestTakeWithSeconds(t *testing.T) {
 	for _, tc := range cases {
 		t.Run("result for "+tc.date, func(test *testing.T) {
 			Set("language", tc.lang)
-			Set("location", "Europe/Kiev")
+			//Set("location", "Europe/Kiev")
 
 			if res := Take(tc.date); res != tc.result[0] && res != tc.result[1] {
 				test.Errorf("Result must be %s or %s, but got %s instead", tc.result[0], tc.result[1], res)
