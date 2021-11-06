@@ -47,14 +47,14 @@ func RegisterTranslations(lang string, trans map[string]string) {
 // but `2 seconds` requires `s`. So this method keeps all
 // possible options for the translated word.
 func getTimeTranslations(lang string) map[string][]string {
-	t := GetTranslations(lang)
+	t := getTranslations(lang)
 	if t == nil {
 		return nil
 	}
 	return t.dist
 }
 
-func GetTranslations(lang string) *Translations {
+func getTranslations(lang string) *Translations {
 	t, ok := translations[lang]
 	if ok {
 		return t
@@ -71,7 +71,7 @@ func trans(key string, langs ...string) string {
 		lang = langs[0]
 	}
 
-	if t := GetTranslations(lang); t != nil {
+	if t := getTranslations(lang); t != nil {
 		return t.T(key)
 	}
 
