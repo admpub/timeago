@@ -17,23 +17,22 @@ func bigSubTime(years int, months int, days int) string {
 
 func TestGetOption(test *testing.T) {
 	cases := []struct {
-		name            string
-		date            string
-		optionMustBe    string
-		hasOptionMustBe bool
+		name         string
+		date         string
+		optionMustBe string
 	}{
-		{"case has online option", "2017-02-01 00:00:00|online", "online", true},
-		{"case has random option", "2017-02-01 00:00:00|random", "random", true},
-		{"case has online option", "2017-02-01 00:00:00|korotchaeva", "korotchaeva", true},
-		{"case don't have option", "2017-02-01 00:00:00", "", false},
+		{"case has online option", "2017-02-01 00:00:00|online", "online"},
+		{"case has random option", "2017-02-01 00:00:00|random", "random"},
+		{"case has online option", "2017-02-01 00:00:00|korotchaeva", "korotchaeva"},
+		{"case don't have option", "2017-02-01 00:00:00", ""},
 	}
 
 	for _, tc := range cases {
 		test.Run(tc.name, func(t *testing.T) {
-			_, _, option, hasOption := getOption(&tc.date)
+			_, _, option := getOption(&tc.date)
 
-			if hasOption != tc.hasOptionMustBe || option != tc.optionMustBe {
-				t.Errorf("Result of getOption func must return `online` string and `true`, but `%s` string and `%v` returned returned", tc.optionMustBe, tc.hasOptionMustBe)
+			if option != tc.optionMustBe {
+				t.Errorf("Result of getOption func must return `online` string and `true`, but `%s` string returned returned", tc.optionMustBe)
 			}
 		})
 	}
@@ -76,6 +75,8 @@ func TestGetWords(t *testing.T) {
 		{"days", 11, "11 дней назад", "ru"},
 		{"years", 21, "21 год назад", "ru"},
 		{"minutes", 59, "59 минут назад", "ru"},
+		// zh-cn
+		{"days", 21, "21天以前", "zh-cn"},
 	}
 
 	for _, tc := range cases {
@@ -384,7 +385,7 @@ func TestTakeWithSeconds(t *testing.T) {
 			//Set("location", "Europe/Kiev")
 
 			if res := Take(tc.date); res != tc.result[0] && res != tc.result[1] {
-				test.Errorf("Result must be %s or %s, but got %s instead", tc.result[0], tc.result[1], res)
+				test.Errorf("%s => %s: Result must be %s or %s, but got %s instead", tc.date, time.Now().Format(`2006-01-02 15:04:05`), tc.result[0], tc.result[1], res)
 			}
 		})
 	}

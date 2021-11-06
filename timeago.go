@@ -13,19 +13,30 @@ import (
 // 60 seconds, add `|online` flag to the datetime string.
 // Format must be [year-month-day hours:minutes:seconds}
 func Take(datetime string, langs ...string) string {
-	lang, format, option, hasOption := getOption(&datetime)
+	lang, format, option := getOption(&datetime)
 	seconds := getSeconds(datetime, format)
 	if len(langs) > 0 {
 		lang = langs[0]
 	}
-	switch {
-	case seconds < 0 && option == "online":
-		return trans("online", lang)
-	case seconds < 0:
-		return getWords("seconds", 0, lang)
-	}
+	return calculateTheResult(seconds, option, lang)
+}
 
-	return calculateTheResult(seconds, hasOption, option, lang)
+func Timestamp(timestamp int64, langAndOptions ...string) string {
+	var seconds int
+	t := time.Unix(timestamp, 0)
+	if loc != nil {
+		seconds = int(time.Now().In(loc).Sub(t).Seconds())
+	} else {
+		seconds = int(time.Since(t).Seconds())
+	}
+	var lang, option string
+	if len(langAndOptions) > 0 {
+		lang = langAndOptions[0]
+	}
+	if len(langAndOptions) > 1 && len(langAndOptions[1]) > 0 {
+		option = langAndOptions[1]
+	}
+	return calculateTheResult(seconds, option, lang)
 }
 
 func getSeconds(datetime, format string) (seconds int) {
@@ -42,14 +53,26 @@ func getSeconds(datetime, format string) (seconds int) {
 	return
 }
 
-func calculateTheResult(seconds int, hasOption bool, option string, lang string) string {
+func calculateTheResult(seconds int, option string, lang string) string {
+	if seconds < 0 {
+		seconds = 0
+	}
+
+	if seconds < 60 {
+		if len(option) > 0 {
+			switch option {
+			case `online`, `now`:
+				return trans(option, lang)
+			default:
+				return getWords("seconds", seconds, lang)
+			}
+		}
+		return getWords("seconds", seconds, lang)
+	}
+
 	minutes, hours, days, weeks, months, years := getTimeCalculations(float64(seconds))
 
 	switch {
-	case hasOption && option == "online" && seconds < 60:
-		return trans("online", lang)
-	case seconds < 60:
-		return getWords("seconds", seconds, lang)
 	case minutes < 60:
 		return getWords("minutes", minutes, lang)
 	case hours < 24:
@@ -115,22 +138,20 @@ func getWords(timeKind string, num int, lang string) string {
 // getOption check if datetime has option with time,
 // if yes, it will return this option and remove it
 // from datetime
-func getOption(datetime *string) (string, string, string, bool) {
+func getOption(datetime *string) (string, string, string) {
 	date := *datetime
 	spittedDateString := strings.Split(date, "|")
 
 	var (
-		option    string
-		format    string
-		lang      string
-		hasOption bool
+		option string
+		format string
+		lang   string
 	)
 	size := len(spittedDateString)
 	if size > 1 {
 		*datetime = spittedDateString[0]
 		if len(spittedDateString[1]) > 0 {
 			option = spittedDateString[1]
-			hasOption = true
 		}
 		if size > 2 {
 			format = spittedDateString[2]
@@ -140,5 +161,5 @@ func getOption(datetime *string) (string, string, string, bool) {
 		}
 	}
 
-	return lang, format, option, hasOption
+	return lang, format, option
 }

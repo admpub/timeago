@@ -4,6 +4,7 @@ func getEnglish() map[string]string {
 	return map[string]string{
 		"ago":    "ago",
 		"online": "Online",
+		"now":    "Now",
 		// Seconds
 		"second":   "second",
 		"seconds":  "seconds",

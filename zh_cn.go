@@ -4,7 +4,8 @@ func getZhCN() map[string]string {
 	return map[string]string{
 		"format": "%s%s%s",
 		"ago":    "以前",
-		"online": "刚刚",
+		"online": "在线",
+		"now":    "刚刚",
 		// Seconds
 		"second":   "秒",
 		"seconds":  "秒",

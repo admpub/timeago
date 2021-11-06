@@ -4,6 +4,7 @@ func getRussian() map[string]string {
 	return map[string]string{
 		"ago":    "назад",
 		"online": "В сети",
+		"now":    "сейчас",
 		// Seconds
 		"second":   "секунда",
 		"seconds":  "секунды",
