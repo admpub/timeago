@@ -59,7 +59,7 @@ func TestGetTimeTranslations(t *testing.T) {
 func TestGetWords(t *testing.T) {
 	cases := []struct {
 		timeKind string
-		num      int
+		num      float64
 		result   string
 		lang     string
 	}{
@@ -93,7 +93,7 @@ func TestGetWords(t *testing.T) {
 
 func TestGetLastNumber(t *testing.T) {
 	cases := []struct {
-		number int
+		number int64
 		result int
 		name   string
 	}{

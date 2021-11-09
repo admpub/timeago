@@ -9,15 +9,15 @@ import (
 )
 
 func TestGetTimeCalculations(t *testing.T) {
-	seconds := 62
-	minutes, hours, days, weeks, months, years := getTimeCalculations(float64(seconds))
-	fmt.Printf("%d => minutes:%d, hours:%d, days:%d, weeks:%d, months:%d, years:%d\n", seconds, minutes, hours, days, weeks, months, years)
-	assert.Equal(t, 1, minutes)
-	assert.Equal(t, 0, hours)
-	assert.Equal(t, 0, days)
-	assert.Equal(t, 0, weeks)
-	assert.Equal(t, 0, months)
-	assert.Equal(t, 0, years)
+	var seconds float64 = 62
+	minutes, hours, days, weeks, months, years := getTimeCalculations(seconds)
+	fmt.Printf("%f => minutes:%f, hours:%f, days:%f, weeks:%f, months:%f, years:%f\n", seconds, minutes, hours, days, weeks, months, years)
+	assert.Equal(t, 1.0, minutes)
+	assert.Equal(t, 0.0, hours)
+	assert.Equal(t, 0.0, days)
+	assert.Equal(t, 0.0, weeks)
+	assert.Equal(t, 0.0, months)
+	assert.Equal(t, 0.0, years)
 
 	result := calculateTheResult(62, ``, `en`)
 	assert.Equal(t, `1 minute ago`, result)
@@ -25,7 +25,7 @@ func TestGetTimeCalculations(t *testing.T) {
 	datetime := smallSubTime(-60 * time.Second)
 
 	seconds = getSeconds(datetime, ``)
-	assert.Equal(t, 60, seconds)
+	assert.Equal(t, int64(60), int64(seconds))
 
 	result = Take(datetime, `en`)
 	fmt.Println(datetime)
@@ -34,13 +34,13 @@ func TestGetTimeCalculations(t *testing.T) {
 
 	datetime = smallSubTime(time.Second)
 	seconds = getSeconds(datetime, ``)
-	assert.Equal(t, 0, seconds)
+	assert.Equal(t, int64(0), int64(seconds))
 	result = Take(datetime, `en`)
 	assert.Equal(t, `0 seconds ago`, result)
 
 	datetime = smallSubTime(time.Second * 2)
 	seconds = getSeconds(datetime, ``)
-	assert.Equal(t, -1, seconds)
+	assert.Equal(t, int64(-1), int64(seconds))
 	result = Take(datetime, `en`)
 	assert.Equal(t, `0 seconds ago`, result)
 }
